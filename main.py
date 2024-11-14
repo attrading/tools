@@ -954,7 +954,7 @@ if st.button("Get Data"):
                                 legend=dict(title_text=None),
                         )
                         st.plotly_chart(fig, use_container_width=True)
-                    except: st.write("Failed to get EPS trend.")
+                    except Exception as e: st.write(f'Failed to get EPS trend. {e}')
             except: st.write("Failed to get earnings data.")
             st.caption("Data source: Yahoo Finance")
 
@@ -1003,8 +1003,8 @@ if st.button("Get Data"):
                         height=400,
                     )
                     st.plotly_chart(fig, use_container_width=True)
-                except:
-                    st.write(f'{name} has no growth estimates data.')
+                except Exception as e:
+                    st.write(f'{name} has no growth estimates data. {e}')
             
             with gcol2:
                 try:
@@ -1041,7 +1041,7 @@ if st.button("Get Data"):
                     st.caption("The growth estimation data is sourced from Yahoo Finance.")
                     st.caption("Please note that estimated data may not always be accurate and should not be solely relied upon for making investment decisions.")
                 except Exception as e: 
-                    st.write(f'{name} has no other estimates data.')
+                    st.write(f'{name} has no other estimates data. {e}')
             st.caption("Data source: Yahoo Finance")
 
 # Scores
@@ -2743,8 +2743,8 @@ if st.button("Get Data"):
                         st.write("---")
                     if column_index == (num_columns - 1):
                         st.write("")
-            except:
-                st.warning("Failed to get news.")
+            except Exception as e:
+                st.warning(f'Failed to get news. {e}')
             ''
 
     except Exception as e:
