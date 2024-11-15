@@ -1088,35 +1088,45 @@ if st.button("Get Data"):
             with gcol2:
                 try:
                     sub_gcol1 = st.columns(2)
+                    current_year = datetime.datetime.now().year
+                    one_yr_header = f'FY {current_year + 1}'
+                    two_yr_header = f'FY {current_year + 2}'
+                    three_yr_header = f'FY {current_year + 3}'
                     try:
-                        one_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[6]].values[0]
+                        one_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', one_yr_header].values[0]
+                        #one_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[6]].values[0]
                     except: one_yr_revenue = 'N/A'
                     sub_gcol1[0].metric(label='+1Y Revenue Growth',value=one_yr_revenue)
 
                     try:
-                        one_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[6]].values[0]
+                        one_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', one_yr_header].values[0]
+                        #one_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[6]].values[0]
                     except: one_yr_earnings = 'N/A'
                     sub_gcol1[1].metric(label='+1Y EPS Growth',value=one_yr_earnings)
 
                     sub_gcol2 = st.columns(2)
                     try:
-                        two_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[7]].values[0]
+                        two_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', two_yr_header].values[0]
+                        #two_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[7]].values[0]
                     except: two_yr_revenue = 'N/A'
                     sub_gcol2[0].metric(label='+2Y Revenue Growth',value=two_yr_revenue)
 
                     try:
-                        two_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[7]].values[0]
+                        two_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', two_yr_header].values[0]
+                        #two_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[7]].values[0]
                     except: two_yr_earnings = 'N/A'
                     sub_gcol2[1].metric(label='+2Y EPS Growth',value=two_yr_earnings)
 
                     sub_gcol3 = st.columns(2)
                     try:
-                        three_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[8]].values[0]
+                        three_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', three_yr_header].values[0]
+                        #three_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[8]].values[0]
                     except: three_yr_revenue = 'N/A'
                     sub_gcol3[0].metric(label='+3Y Revenue Growth',value=three_yr_revenue)
 
                     try:
-                        three_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[8]].values[0]
+                        three_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', three_yr_header].values[0]
+                        #three_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[8]].values[0]
                     except: three_yr_earnings = 'N/A'
                     sub_gcol3[1].metric(label='+2Y EPS Growth',value=three_yr_earnings)
 
