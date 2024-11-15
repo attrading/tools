@@ -30,6 +30,7 @@ def get_stock_data(ticker, apiKey=None):
         exchange_value = "NASDAQ"
     else:
         exchange_value = "N/A"
+    lower_exchange = exchange_value.lower()
 
     ##### Morning Star #####
     fair_value = fvDate = moat = moatDate = starRating = assessment = 'N/A'
@@ -129,6 +130,26 @@ def get_stock_data(ticker, apiKey=None):
                         sk_targetprice = get_sk_data['dataitemvalue']
                     except Exception as e:
                         print("Price Data: Seeking Alpha API request failed.")
+    
+    ##### SA forecasts #####
+    try:
+        url = f'https://stockanalysis.com/stocks/{ticker}/forecast/'
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text,"lxml")
+        table = soup.find("table",class_ = "w-full whitespace-nowrap border border-gray-200 text-right text-sm dark:border-dark-700 sm:text-base")
+        rows = table.find_all("tr")
+        headers = []
+        data = []
+        for row in rows:
+            cols = row.find_all(["th", "td"])
+            cols_text = [col.text.strip() for col in cols]
+            if not headers:
+                headers = cols_text
+            else:
+                data.append(cols_text)
+        sa_growth_df = pd.DataFrame(data, columns=headers)
+        sa_growth_df = sa_growth_df.iloc[1:, :-1].reset_index(drop=True)
+    except: sa_growth_df = ""
     
     ##### SA scores #####
     try:
@@ -234,6 +255,10 @@ def get_stock_data(ticker, apiKey=None):
             row_data = [cell.get_text(strip=True) for cell in row.find_all('td')]
             rows.append(row_data)
         mb_div_df = pd.DataFrame(rows, columns=headers)
+        if mb_div_df.iloc[0, 0] == 'Annual Dividend':
+            mb_div_df = mb_div_df
+        else:
+            mb_div_df = ""
     except: mb_div_df = ""
 
     ##### Market Beat competitors #####
@@ -289,6 +314,74 @@ def get_stock_data(ticker, apiKey=None):
         sa_metrics_df2 = pd.DataFrame(data2, columns=headers2)
         sa_metrics_df2 = sa_metrics_df2.iloc[1:, :-1].reset_index(drop=True)
     except: sa_metrics_df2 = ""
+
+    ##### Market Beat insider trades #####
+    try:
+        insider_mb_url = f'https://www.marketbeat.com/stocks/{exchange_value}/{upper_ticker}/insider-trades/'
+        response = requests.get(insider_mb_url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        tables = soup.find_all('table')
+        if len(tables) >= 0:
+            insider_mb = pd.read_html(str(tables[0]))[0]
+        else:    
+            insider_mb = ""
+    except: insider_mb = ""
+
+    ##### Alpha Spread comparison #####
+    try:
+        as_rv_url = f'https://www.alphaspread.com/security/{lower_exchange}/{lowercase_ticker}/relative-valuation'
+        as_rv_response = requests.get(as_rv_url)
+        as_rv_soup = BeautifulSoup(as_rv_response.text, 'html.parser')
+        as_rv_tables = as_rv_soup.find_all('table')
+        if len(as_rv_tables) >= 0:
+            as_rv_result = pd.read_html(str(as_rv_tables[15]))[0]
+            as_rv_result = pd.DataFrame(as_rv_result)
+            as_rv_result = as_rv_result.drop(as_rv_result.columns[[1, -1]], axis=1)
+            as_rv_result.columns.values[0] = 'Country'
+            as_rv_result.columns.values[1] = 'Company'
+        else:    
+            as_rv_result = ""
+        asp_url = f'https://www.alphaspread.com/security/{lower_exchange}/{lowercase_ticker}/profitability'
+        asp_response = requests.get(asp_url)
+        asp_soup = BeautifulSoup(asp_response.text, 'html.parser')
+        asp_tables = asp_soup.find_all('table')
+        if len(asp_tables) >= 0:
+            asp = pd.read_html(str(asp_tables[4]))[0]
+            asp = pd.DataFrame(asp)
+            asp = asp.drop(asp.columns[[1, -1]], axis=1)
+            asp.columns.values[0] = 'Country'
+            asp.columns.values[1] = 'Company'
+            asp = asp.iloc[:, -3:]
+        else:    
+            asp = ""
+        asp_url = f'https://www.alphaspread.com/security/{lower_exchange}/{lowercase_ticker}/profitability'
+        asp_response = requests.get(asp_url)
+        asp_soup = BeautifulSoup(asp_response.text, 'html.parser')
+        asp_tables = asp_soup.find_all('table')
+        if len(asp_tables) >= 0:
+            asp = pd.read_html(str(asp_tables[4]))[0]
+            asp = pd.DataFrame(asp)
+            asp = asp.drop(asp.columns[[1, -1]], axis=1)
+            asp.columns.values[0] = 'Country'
+            asp.columns.values[1] = 'Company'
+            asp = asp.iloc[:, -3:]
+        else:    
+            asp = ""
+        asp2_url = f'https://www.alphaspread.com/security/{lower_exchange}/{lowercase_ticker}/profitability'
+        asp2_response = requests.get(asp2_url)
+        asp2_soup = BeautifulSoup(asp2_response.text, 'html.parser')
+        asp2_tables = asp2_soup.find_all('table')
+        if len(asp_tables) >= 0:
+            asp2 = pd.read_html(str(asp2_tables[27]))[0]
+            asp2 = pd.DataFrame(asp2)
+            asp2 = asp2.drop(asp2.columns[[1, -1]], axis=1)
+            asp2.columns.values[0] = 'Country'
+            asp2.columns.values[1] = 'Company'
+            asp2 = asp2.iloc[:, -3:]
+        else:    
+            asp2 = ""
+        as_combined_table = pd.concat([as_rv_result, asp, asp2], axis = 1)
+    except: as_rv_result = as_combined_table = ""
     
     name = stock.info.get('longName', 'N/A')
     sector = stock.info.get('sector', 'N/A')
@@ -297,8 +390,8 @@ def get_stock_data(ticker, apiKey=None):
     marketCap = stock.info.get('marketCap', 'N/A')
     beta = stock.info.get('beta', 'N/A')
     longProfile = stock.info.get('longBusinessSummary', 'N/A')
-    eps = stock.info.get('trailingEps', 'N/A')
-    pegRatio = stock.info.get('pegRatio', 'N/A')
+    eps = stock.info.get('trailingEps')
+    pegRatio = stock.info.get('pegRatio', stock.info.get('trailingPegRatio', 'N/A'))
     country = stock.info.get('country', 'N/A')
     yf_targetprice = stock.info.get('targetMeanPrice', 'N/A')
     yf_consensus = stock.info.get('recommendationKey', 'N/A')
@@ -351,12 +444,6 @@ def get_stock_data(ticker, apiKey=None):
     except: earnings_history = ""
     try: eps_trend = stock.eps_trend
     except: eps_trend = ""
-    try: growth_estimates = stock.growth_estimates
-    except: growth_estimates = ""
-    try: earnings_estimate = stock.earnings_estimate
-    except: earnings_estimate = ""
-    try: revenue_estimate = stock.revenue_estimate
-    except: revenue_estimate = ""
     try:
         income_statement_tb = stock.income_stmt
         quarterly_income_statement_tb = stock.quarterly_income_stmt
@@ -416,7 +503,7 @@ def get_stock_data(ticker, apiKey=None):
         eps_yield = eps/price
     except: eps_yield = "N/A"
     
-    return news, eps_yield, end_date, extended_data_r, macd_data_r, rsi_data_r, ta_data_r, matching_etf, yf_com, mb_alt_headers, sa_metrics_df2, sa_metrics_df, cashflow_statement_tb, quarterly_cashflow_statement_tb, balance_sheet_tb, quarterly_balance_sheet_tb, income_statement_tb, quarterly_income_statement_tb, mb_alt_df, mb_div_df, mb_com_df, mb_targetprice_value, mb_predicted_upside, mb_consensus_rating, mb_rating_score, sa_analysts_count, sa_analysts_consensus, sa_analysts_targetprice, sa_altmanz, sa_piotroski, sk_targetprice, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, epsRevisionsGrade, dpsRevisionsGrade, dividendYieldGrade, divSafetyCategoryGrade, divGrowthCategoryGrade, divConsistencyCategoryGrade, sellSideRating, ticker_id, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, performance_id, fair_value, fvDate, moat, moatDate, starRating, assessment, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, dividend_history, earningsDate, previous_close, current_ratio, fcf, revenue, exchange_value, upper_ticker, roa, ebitdamargin, operatingmargin, grossmargin, profitmargin, roe, revenue_growth_current, exDividendDate, pbRatio, deRatio, dividends, ticker, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, apiKey
+    return news, as_rv_result, as_combined_table, insider_mb, sa_growth_df, eps_yield, end_date, extended_data_r, macd_data_r, rsi_data_r, ta_data_r, matching_etf, yf_com, mb_alt_headers, sa_metrics_df2, sa_metrics_df, cashflow_statement_tb, quarterly_cashflow_statement_tb, balance_sheet_tb, quarterly_balance_sheet_tb, income_statement_tb, quarterly_income_statement_tb, mb_alt_df, mb_div_df, mb_com_df, mb_targetprice_value, mb_predicted_upside, mb_consensus_rating, mb_rating_score, sa_analysts_count, sa_analysts_consensus, sa_analysts_targetprice, sa_altmanz, sa_piotroski, sk_targetprice, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, epsRevisionsGrade, dpsRevisionsGrade, dividendYieldGrade, divSafetyCategoryGrade, divGrowthCategoryGrade, divConsistencyCategoryGrade, sellSideRating, ticker_id, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, performance_id, fair_value, fvDate, moat, moatDate, starRating, assessment, eps_trend, earnings_history, dividend_history, earningsDate, previous_close, current_ratio, fcf, revenue, exchange_value, upper_ticker, roa, ebitdamargin, operatingmargin, grossmargin, profitmargin, roe, revenue_growth_current, exDividendDate, pbRatio, deRatio, dividends, ticker, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, apiKey
 
 ''
 ''
@@ -426,7 +513,7 @@ def get_stock_data(ticker, apiKey=None):
 
 main_col1, main_col2 = st.columns([3,1])
 with main_col1:
-    st.title("Stock Analysis Dashboard")
+    st.title("US Stock Analysis Tool")
     input_col1, input_col2, input_col3 = st.columns([1, 3, 1])
     with input_col1:
         ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
@@ -434,11 +521,11 @@ with main_col1:
         apiKey = st.text_input("Enter your RapidAPI Key (optional):", "")
 
 st.write("This analysis dashboard is designed to enable beginner investors to analyze stocks effectively and with ease. Please note that the information in this page is intended for educational purposes only and it does not constitute investment advice or a recommendation to buy or sell any security. We are not responsible for any losses resulting from trading decisions based on this information.")
-st.info('Data is sourced from Yahoo Finance, Morningstar, Seeking Alpha, Market Beat, and Stockanalysis.com. Certain sections require API keys to operate. Users are advised to subscribe to the Morningstar and Seeking Alpha APIs provided by Api Dojo through rapidapi.com.')
+st.info('Data is sourced from Yahoo Finance, Morningstar, Seeking Alpha, Market Beat, Stockanalysis.com and Alpha Spread. Certain sections require API keys to operate. Users are advised to subscribe to the Morningstar and Seeking Alpha APIs provided by Api Dojo through rapidapi.com.')
 
 if st.button("Get Data"):
     try:
-        news, eps_yield, end_date, extended_data_r, macd_data_r, rsi_data_r, ta_data_r, matching_etf, yf_com, mb_alt_headers, sa_metrics_df2, sa_metrics_df, cashflow_statement_tb, quarterly_cashflow_statement_tb, balance_sheet_tb, quarterly_balance_sheet_tb, income_statement_tb, quarterly_income_statement_tb, mb_alt_df, mb_div_df, mb_com_df, mb_targetprice_value, mb_predicted_upside, mb_consensus_rating, mb_rating_score, sa_analysts_count, sa_analysts_consensus, sa_analysts_targetprice, sa_altmanz, sa_piotroski, sk_targetprice, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, epsRevisionsGrade, dpsRevisionsGrade, dividendYieldGrade, divSafetyCategoryGrade, divGrowthCategoryGrade, divConsistencyCategoryGrade, sellSideRating, ticker_id, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, performance_id, fair_value, fvDate, moat, moatDate, starRating, assessment, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, dividend_history, earningsDate, previous_close, current_ratio, fcf, revenue, exchange_value, upper_ticker, roa, ebitdamargin, operatingmargin, grossmargin, profitmargin, roe, revenue_growth_current, exDividendDate, pbRatio, deRatio, dividends, ticker, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        news, as_rv_result, as_combined_table, insider_mb, sa_growth_df, eps_yield, end_date, extended_data_r, macd_data_r, rsi_data_r, ta_data_r, matching_etf, yf_com, mb_alt_headers, sa_metrics_df2, sa_metrics_df, cashflow_statement_tb, quarterly_cashflow_statement_tb, balance_sheet_tb, quarterly_balance_sheet_tb, income_statement_tb, quarterly_income_statement_tb, mb_alt_df, mb_div_df, mb_com_df, mb_targetprice_value, mb_predicted_upside, mb_consensus_rating, mb_rating_score, sa_analysts_count, sa_analysts_consensus, sa_analysts_targetprice, sa_altmanz, sa_piotroski, sk_targetprice, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, epsRevisionsGrade, dpsRevisionsGrade, dividendYieldGrade, divSafetyCategoryGrade, divGrowthCategoryGrade, divConsistencyCategoryGrade, sellSideRating, ticker_id, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, performance_id, fair_value, fvDate, moat, moatDate, starRating, assessment, eps_trend, earnings_history, dividend_history, earningsDate, previous_close, current_ratio, fcf, revenue, exchange_value, upper_ticker, roa, ebitdamargin, operatingmargin, grossmargin, profitmargin, roe, revenue_growth_current, exDividendDate, pbRatio, deRatio, dividends, ticker, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
      
 #############################################         #############################################
 ############################################# Profile #############################################
@@ -495,7 +582,7 @@ if st.button("Get Data"):
 ############################################# Tabs #############################################
 #############################################      #############################################
 
-        overview_data, comparison_data, statements_data, guru_checklist, technicalAnalysis_data, news_data = st.tabs (["Overview","Comparisons","Financial Statements","Guru Checklist","Technical Analysis","Top News"])
+        overview_data, comparison_data, statements_data, guru_checklist, insider_trades, technicalAnalysis_data, news_data = st.tabs (["Overview","Comparisons","Financial Statements","Guru Checklist","Insider Trades","Technical Analysis","Top News"])
 
 #############################################               #############################################
 ############################################# Overview Data #############################################
@@ -511,7 +598,10 @@ if st.button("Get Data"):
             eps_value = 'N/A' if eps == 'N/A' else f'{eps:,.2f}'
             cols[1].metric(label='EPS (ttm)',value=eps_value)
             
-            pegRatio_value = 'N/A' if pegRatio == 'N/A' else f'{pegRatio:,.2f}'
+            try:
+                pegRatio_value = 'N/A' if pegRatio == 'N/A' else f'{pegRatio:,.2f}'
+            except: 
+                pegRatio_value = 'N/A'
             cols[2].metric(label='PEG Ratio',value=pegRatio_value)
             
             beta_value = 'N/A' if beta == 'N/A' else f'{beta:.2f}'
@@ -954,95 +1044,86 @@ if st.button("Get Data"):
                                 legend=dict(title_text=None),
                         )
                         st.plotly_chart(fig, use_container_width=True)
-                    except Exception as e: st.write(f'Failed to get EPS trend. {e}')
+                    except: st.write("Failed to get EPS trend.")
             except: st.write("Failed to get earnings data.")
             st.caption("Data source: Yahoo Finance")
 
 #Estimate Data
             st.subheader('Growth Estimation', divider='gray')
-            gcol1, gcol2= st.columns([3, 3])
+            gcol1, gcol2= st.columns([3, 2])
             with gcol1:
                 try:
-                    gdata = growth_estimates.loc[["-5y", "0y", "+1y", "+5y"], ["stock", "index"]] * 100
-                    gdata["label"] = ['5 Years Ago', 'Current', 'Next 1 Year', 'Next 5 Years']
-                    gdata = gdata.reset_index(drop=True)
-                    gdata_long = pd.melt(gdata, id_vars='label', value_vars=['stock', 'index'], var_name='Category', value_name='Percentage')
-                    fig = go.Figure()
-                    categories = gdata_long['Category'].unique()
-                    for category in categories:
-                        df_category = gdata_long[gdata_long['Category'] == category]
-                        show_labels = True if category == categories[-1] else False 
-                        fig.add_trace(
-                            go.Scatter(
-                                x=df_category['label'],
-                                y=df_category['Percentage'],
+                        growth_metrics = ['Revenue Growth', 'EPS Growth']
+                        sa_growth_df_filtered = sa_growth_df[sa_growth_df['Fiscal Year'].isin(growth_metrics)]
+                        sa_growth_metrics_df_melted = sa_growth_df_filtered.melt(id_vars=['Fiscal Year'], var_name='Year', value_name='Value')
+                        growth_unique_years = sa_growth_metrics_df_melted['Year'].unique()
+                        growth_unique_years_sorted = sorted([year for year in growth_unique_years if year != 'Current'])
+                        if 'Current' in growth_unique_years:
+                            growth_unique_years_sorted.append('Current')
+                        fig_growth = go.Figure()
+                        for fiscal_year in sa_growth_metrics_df_melted['Fiscal Year'].unique():
+                            filtered_data = sa_growth_metrics_df_melted[sa_growth_metrics_df_melted['Fiscal Year'] == fiscal_year]
+                            fig_growth.add_trace(go.Scatter(
+                                x=filtered_data['Year'],
+                                y=filtered_data['Value'],
                                 mode='lines+markers',
-                                name=category,
-                                line=dict(color='#48CFAD' if category == 'stock' else '#FFCE54'),
-                                marker=dict(size=8),
-                                showlegend=True,
-                                hoverinfo="text",
-                                text=[f"{label}: {perc:.2f}%" for label, perc in zip(df_category['label'], df_category['Percentage'])]
-                            )
-                        )
-                    fig.update_layout(
-                        title={"text":'Growth Estimates Over Time'},# "font": {"size": 22}},
+                                name=str(fiscal_year)
+                            ))
+                        fig_growth.update_layout(
+                            title={"text":"Growth Data", "font": {"size": 20}},
                             title_y=1,  
                             title_x=0, 
-                            margin=dict(t=30, b=40, l=40, r=30),
-                        xaxis=dict(
-                            title="Time Period",
-                            tickvals=df_category['label'] if show_labels else [],
-                            showgrid=True
-                        ),
-                        yaxis=dict(
-                            title="Growth Estimate (%)",
-                            showgrid=True
-                        ),
-                        width=600,
-                        height=400,
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+                            margin=dict(t=30, b=30, l=40, r=30),
+                            xaxis_title='Year',
+                            yaxis_title='Value (%)',
+                            xaxis=dict(tickmode='array', tickvals=growth_unique_years_sorted,showgrid=True),
+                            yaxis=dict(showgrid=True),
+                            xaxis_tickangle=0,
+                            height=400
+                        )
+                        st.plotly_chart(fig_growth, use_container_width=True)
                 except Exception as e:
-                    st.write(f'{name} has no growth estimates data. {e}')
+                        st.write(f'{name} has no growth estimates data. {e}')
             
             with gcol2:
                 try:
                     sub_gcol1 = st.columns(2)
-                    earnings_growth_nextq = earnings_estimate.loc['+1q', 'growth']
-                    revenue_growth_nextq = revenue_estimate.loc['+1q', 'growth']
-                    if earnings_growth_nextq and earnings_growth_nextq!='NaN' and earnings_growth_nextq!=None:
-                        earnings_growth__nextq_value = f'{earnings_growth_nextq*100:.2f}%'
-                    else:
-                        earnings_growth__nextq_value = 'N/A'
-                    sub_gcol1[0].metric(label='Next Quarter Earnings Growth',value=earnings_growth__nextq_value)
+                    try:
+                        one_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[6]].values[0]
+                    except: one_yr_revenue = 'N/A'
+                    sub_gcol1[0].metric(label='+1Y Revenue Growth',value=one_yr_revenue)
 
-                    if revenue_growth_nextq and revenue_growth_nextq!='NaN' and revenue_growth_nextq!=None:
-                        revenue_growth__nextq_value = f'{revenue_growth_nextq*100:.2f}%'
-                    else:
-                        revenue_growth__nextq_value = 'N/A'
-                    sub_gcol1[1].metric(label='Next Quarter Revenue Growth',value=revenue_growth__nextq_value)
+                    try:
+                        one_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[6]].values[0]
+                    except: one_yr_earnings = 'N/A'
+                    sub_gcol1[1].metric(label='+1Y EPS Growth',value=one_yr_earnings)
 
                     sub_gcol2 = st.columns(2)
-                    earnings_growth_nexty = earnings_estimate.loc['+1y', 'growth']
-                    revenue_growth_nexty = revenue_estimate.loc['+1y', 'growth']
-                    if earnings_growth_nexty and earnings_growth_nexty!='NaN' and earnings_growth_nexty!=None:
-                        earnings_growth__nexty_value = f'{earnings_growth_nexty*100:.2f}%'
-                    else:
-                        earnings_growth__nexty_value = 'N/A'
-                    sub_gcol2[0].metric(label='Next Year Earnings Growth',value=earnings_growth__nexty_value)
+                    try:
+                        two_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[7]].values[0]
+                    except: two_yr_revenue = 'N/A'
+                    sub_gcol2[0].metric(label='+2Y Revenue Growth',value=two_yr_revenue)
 
-                    if revenue_growth_nexty and revenue_growth_nexty!='NaN' and revenue_growth_nexty!=None:
-                        revenue_growth__nexty_value = f'{revenue_growth_nexty*100:.2f}%'
-                    else:
-                        revenue_growth__nexty_value = 'N/A'
-                    sub_gcol2[1].metric(label='Next Year Revenue Growth',value=revenue_growth__nexty_value)
+                    try:
+                        two_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[7]].values[0]
+                    except: two_yr_earnings = 'N/A'
+                    sub_gcol2[1].metric(label='+2Y EPS Growth',value=two_yr_earnings)
 
-                    st.caption("The growth estimation data is sourced from Yahoo Finance.")
+                    sub_gcol3 = st.columns(2)
+                    try:
+                        three_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[8]].values[0]
+                    except: three_yr_revenue = 'N/A'
+                    sub_gcol3[0].metric(label='+3Y Revenue Growth',value=three_yr_revenue)
+
+                    try:
+                        three_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[8]].values[0]
+                    except: three_yr_earnings = 'N/A'
+                    sub_gcol3[1].metric(label='+2Y EPS Growth',value=three_yr_earnings)
+
+                    st.caption("The growth estimation data is sourced from Stockanalysis.com.")
                     st.caption("Please note that estimated data may not always be accurate and should not be solely relied upon for making investment decisions.")
                 except Exception as e: 
                     st.write(f'{name} has no other estimates data. {e}')
-            st.caption("Data source: Yahoo Finance")
 
 # Scores
             st.subheader('Scores', divider='gray')
@@ -1135,7 +1216,9 @@ if st.button("Get Data"):
                 largest_count_type = 'N/A'
                 largest_value = 'N/A'
             col1, col2, col3, col4 = st.columns([3, 3, 3, 3])
-            yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice}'
+            try:
+                yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice:.2f}'
+            except: yf_targetprice_value = 'N/A'
             yf_mos_value = 'N/A' if yf_mos == 'N/A' else f'{yf_mos:.2f}%'
             yf_consensus_value = 'N/A' if yf_consensus == 'none' else yf_consensus
             with col1:
@@ -1296,6 +1379,69 @@ if st.button("Get Data"):
                 ''
 
             try:
+                try:
+                    company_values = as_rv_result[as_rv_result['Country'] == 'US']['Company'].head(4)
+                    tickers = [value.split(':')[-1].strip() if ':' in value else '' for value in company_values]
+                    ticker1, ticker2, ticker3, ticker4 = tickers[:4]
+                    scompare_tickers = [ticker for ticker in (ticker1, ticker2, ticker3, ticker4) if ticker]
+                    if scompare_tickers:
+                        send = datetime.datetime.today()
+                        sstart = send - relativedelta(years=5)
+                        def relativereturn(mb_alt_df):
+                            rel = mb_alt_df.pct_change()
+                            cumret = (1 + rel).cumprod() - 1
+                            cumret = cumret.fillna(0)
+                            return cumret
+                        mb_alt_df = relativereturn(yf.download(scompare_tickers, sstart, send)['Adj Close'])
+                        mb_alt_df_melted = mb_alt_df.reset_index().melt(id_vars='Date', var_name='Ticker', value_name='Relative Return')
+                        custom_colors = {
+                            ticker1: '#DA4453',
+                            ticker2: '#4FC1E9',
+                            ticker3: '#A0D468',
+                            ticker4: '#FFCE54'
+                        }
+                        custom_colors = {k: v for k, v in custom_colors.items() if k in scompare_tickers}
+                        def plot_relative_return_comparison(mb_alt_df_melted, custom_colors, main_ticker):
+                            df_plot = mb_alt_df_melted.copy()
+                            fig = go.Figure()
+                            for ticker in df_plot['Ticker'].unique():
+                                df_ticker = df_plot[df_plot['Ticker'] == ticker]
+                                fig.add_trace(
+                                    go.Scatter(
+                                        x=df_ticker['Date'],
+                                        y=df_ticker['Relative Return'],
+                                        mode='lines',
+                                        name=ticker,
+                                        line=dict(color=custom_colors.get(ticker, '#1f77b4'), shape='spline', smoothing=1.3),
+                                        showlegend=True,
+                                        hoverinfo="text",
+                                        text=[f"{date}: {ret:.2f}%" for date, ret in zip(df_ticker['Date'], df_ticker['Relative Return'])]
+                                    )
+                                )
+                                fig.update_layout(
+                                title={"text": f'{main_ticker} - 5 Years Price Performance Comparison With Competitors', "font": {"size": 22}},
+                                title_y=1,
+                                title_x=0,
+                                margin=dict(t=30, b=40, l=40, r=30),
+                                xaxis=dict(
+                                    title="Date",
+                                    showgrid=True
+                                ),
+                                yaxis=dict(
+                                    title="Cumulative Relative Return",
+                                    showgrid=True
+                                ),
+                                height=500,
+                            )
+                            st.plotly_chart(fig, use_container_width=True)
+                        ''
+                        st.subheader(f'{name} Competitors List')
+                        st.dataframe(as_combined_table, hide_index=True, use_container_width=True)
+                        st.caption("Data source: Alpha Spread")
+                        ''
+                        plot_relative_return_comparison(mb_alt_df_melted, custom_colors, ticker1)
+                        st.caption("Data source: Yahoo Finance")
+                except:
                     def clean_ticker_name(text):
                         match = re.match(r"([A-Z]+)([A-Z][a-z].*)", text)
                         if match:
@@ -1321,7 +1467,7 @@ if st.button("Get Data"):
                     st.dataframe(mb_alt_df,hide_index=True,use_container_width=True)
                     st.caption("Data source: Market Beat")
                     ''
-                    try: 
+                    try:
                         ticker_2 = mb_alt_df.iloc[1, 0].split()[0]
                         ticker2 = '' if len(ticker_2) > 4 else ticker_2
                         ticker_3 = mb_alt_df.iloc[2, 0].split()[0]
@@ -1347,14 +1493,12 @@ if st.button("Get Data"):
                                 ticker4: '#FFCE54'
                             }
                             custom_colors = {k: v for k, v in custom_colors.items() if k in scompare_tickers}
-
                             def plot_relative_return_comparison(mb_alt_df_melted, custom_colors, upper_ticker):
                                 df_plot = mb_alt_df_melted.copy()
                                 fig = go.Figure()
                                 for ticker in df_plot['Ticker'].unique():
                                     df_ticker = df_plot[df_plot['Ticker'] == ticker]
                                     show_labels = True if ticker == df_plot['Ticker'].unique()[-1] else False
-
                                     fig.add_trace(
                                         go.Scatter(
                                             x=df_ticker['Date'],
@@ -1388,9 +1532,8 @@ if st.button("Get Data"):
                     except Exception as e:
                         print(f"Failed to scrape ticker data from table.")
                     st.caption("Data source: Yahoo Finance")
-
             except Exception as e:
-                    st.warning(f'Performance Comparison: No data available. {e}')
+                st.warning(f'Performance Comparison: No data available')
 
 #############################################            #############################################
 ############################################# Statements #############################################
@@ -2286,6 +2429,16 @@ if st.button("Get Data"):
             with guru_col9:
                 st.dataframe(df_peterlynch.style.applymap(highlight_result, subset=['Result']),use_container_width=True, hide_index=True)
 
+#############################################                #############################################
+############################################# Insider Trades #############################################
+#############################################                ############################################# 
+        with insider_trades:
+            try:
+                insider_mb = pd.DataFrame(insider_mb).iloc[:, :-2]
+                st.dataframe(insider_mb, use_container_width=True, hide_index=True, height = 600)
+                st.caption("Data source: Market Beat")
+            except: st.warning("Insider information is not available.")
+
 #############################################                         #############################################
 ############################################# Technical Analysis Data #############################################
 #############################################                         #############################################
@@ -2743,8 +2896,8 @@ if st.button("Get Data"):
                         st.write("---")
                     if column_index == (num_columns - 1):
                         st.write("")
-            except Exception as e:
-                st.warning(f'Failed to get news. {e}')
+            except:
+                st.warning("Failed to get news.")
             ''
 
     except Exception as e:
