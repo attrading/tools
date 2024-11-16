@@ -1203,7 +1203,7 @@ if st.button("Get Data"):
                             }
                         ))
                         fig.update_layout(
-                            height=250,
+                            height=350,
                             margin=dict(t=30, b=30, l=40, r=30)
                         )
                         st.plotly_chart(fig)
