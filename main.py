@@ -963,7 +963,7 @@ if st.button("Get Data"):
                             margin=dict(t=30, b=40, l=40, r=30),
                             xaxis_title='Date',
                             yaxis_title='Earnings',
-                            xaxis=dict(type='category',tickangle=30,showgrid=True),
+                            xaxis=dict(type='category',showgrid=True),
                             yaxis=dict(showgrid=True),
                             barmode='group',
                             height=400,
@@ -1035,7 +1035,6 @@ if st.button("Get Data"):
                                     title='Time Period',
                                     categoryorder='array',
                                     showgrid=True,  
-                                    tickangle=30,
                                     categoryarray=['90 Days Ago', '60 Days Ago', '30 Days Ago', '7 Days Ago', 'Current'],
                                 ),
                                 yaxis=dict(
@@ -1073,7 +1072,7 @@ if st.button("Get Data"):
                                 margin=dict(t=30, b=30, l=40, r=30),
                                 xaxis_title='Year',
                                 yaxis_title='Value',
-                                xaxis=dict(tickmode='array', tickangle=30, tickvals=eps_unique_years_sorted, autorange='reversed',showgrid=True),
+                                xaxis=dict(tickmode='array', tickvals=eps_unique_years_sorted, autorange='reversed',showgrid=True),
                                 yaxis=dict(showgrid=True),
                                 height=400
                             )
@@ -1110,7 +1109,7 @@ if st.button("Get Data"):
                             margin=dict(t=30, b=30, l=40, r=30),
                             xaxis_title='Year',
                             yaxis_title='Value (%)',
-                            xaxis=dict(tickmode='array', tickangle=30, tickvals=growth_unique_years_sorted,showgrid=True),
+                            xaxis=dict(tickmode='array', tickvals=growth_unique_years_sorted,showgrid=True),
                             yaxis=dict(showgrid=True),
                             height=400
                         )
@@ -1636,7 +1635,6 @@ if st.button("Get Data"):
                 )
                 fig.update_xaxes(
                     type='category',
-                    tickangle=0,
                     categoryorder='category ascending'
                 )       
                 st.plotly_chart(fig, use_container_width=True)
@@ -1706,7 +1704,6 @@ if st.button("Get Data"):
                 )
                 fig.update_xaxes(
                     type='category',
-                    tickangle=0,
                     categoryorder='category ascending'
                 )       
                 st.plotly_chart(fig, use_container_width=True)
@@ -1776,7 +1773,6 @@ if st.button("Get Data"):
                 )
                 fig.update_xaxes(
                     type='category',
-                    tickangle=0,
                     categoryorder='category ascending'
                 )       
                 st.plotly_chart(fig, use_container_width=True)
