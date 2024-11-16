@@ -2923,6 +2923,7 @@ if st.button("Get Data"):
 #############################################           #############################################
 
         with news_data:
+            st.write(news)
             if news != "":
                 try:
                     st.caption("News data is sourced from Yahoo Finance.")
