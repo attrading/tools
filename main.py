@@ -1060,7 +1060,7 @@ if st.button("Get Data"):
                                 filtered_data = sa_eps_df_melted[sa_eps_df_melted['Fiscal Year'] == fiscal_year]
                                 figg.add_trace(go.Scatter(
                                     x=filtered_data['Year'],
-                                    y=filtered_data['Value (%)'],
+                                    y=filtered_data['Value'],
                                     mode='lines+markers',
                                     name=str(fiscal_year)
                                 ))
@@ -1070,7 +1070,7 @@ if st.button("Get Data"):
                                 title_x=0, 
                                 margin=dict(t=30, b=30, l=40, r=30),
                                 xaxis_title='Year',
-                                yaxis_title='Value (%)',
+                                yaxis_title='Value',
                                 xaxis=dict(tickmode='array', tickvals=eps_unique_years_sorted, autorange='reversed',showgrid=True),
                                 yaxis=dict(showgrid=True),
                                 xaxis_tickangle=0,
