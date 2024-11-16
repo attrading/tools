@@ -934,6 +934,7 @@ if st.button("Get Data"):
             ecol1, ecol2, ecol3 = st.columns([3, 1, 3])
             try:
                 earnings_data = pd.DataFrame(earnings_history)
+                earnings_data = earnings_data[~earnings_data.index.duplicated(keep='first')]
                 with ecol1:
                     if 'epsEstimate' in earnings_data.columns and 'epsActual' in earnings_data.columns:
                         df = earnings_data.reset_index().melt(id_vars=['index'], value_vars=['epsEstimate', 'epsActual'], var_name='variable', value_name='value')
