@@ -1044,7 +1044,40 @@ if st.button("Get Data"):
                                 legend=dict(title_text=None),
                         )
                         st.plotly_chart(fig, use_container_width=True)
-                    except: st.write("Failed to get EPS trend.")
+                    except:
+                        try:
+                            epsmetrics = ['EPS (Diluted)']
+                            sa_eps_df_filtered = sa_eps_df2[sa_eps_df2['Fiscal Year'].isin(epsmetrics)]
+                            sa_eps_df_melted = sa_eps_df_filtered.melt(id_vars=['Fiscal Year'], 
+                                                        var_name='Year', 
+                                                        value_name='Value')
+                            eps_unique_years = sa_eps_df_melted['Year'].unique()
+                            eps_unique_years_sorted = sorted([year for year in eps_unique_years if year != 'TTM'])
+                            if 'TTM' in eps_unique_years:
+                                eps_unique_years_sorted.append('TTM')
+                            figg = go.Figure()
+                            for fiscal_year in sa_eps_df_melted['Fiscal Year'].unique():
+                                filtered_data = sa_eps_df_melted[sa_eps_df_melted['Fiscal Year'] == fiscal_year]
+                                figg.add_trace(go.Scatter(
+                                    x=filtered_data['Year'],
+                                    y=filtered_data['Value (%)'],
+                                    mode='lines+markers',
+                                    name=str(fiscal_year)
+                                ))
+                            figg.update_layout(
+                                title={"text":"Growth Data", "font": {"size": 20}},
+                                title_y=1,  
+                                title_x=0, 
+                                margin=dict(t=30, b=30, l=40, r=30),
+                                xaxis_title='Year',
+                                yaxis_title='Value (%)',
+                                xaxis=dict(tickmode='array', tickvals=eps_unique_years_sorted, autorange='reversed',showgrid=True),
+                                yaxis=dict(showgrid=True),
+                                xaxis_tickangle=0,
+                                height=400
+                            )
+                            st.plotly_chart(figg, use_container_width=True)
+                        except: st.write("Failed to get EPS trend.")
             except: st.write("Failed to get earnings data.")
             st.caption("Data source: Yahoo Finance")
 
