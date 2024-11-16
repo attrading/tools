@@ -1176,9 +1176,9 @@ if st.button("Get Data"):
 
 # Scores
             st.subheader('Scores', divider='gray')
-            score_col1, score_col2 = st.columns([2,3])
-            try:
-                with score_col1:
+            score_col1, score_col2, score_col3, score_col4, score_col5 = st.columns([1,3,1,3,1])
+            with score_col2:
+                try:
                     sa_altmanz_value = 'N/A' if sa_altmanz == 'N/A' else float(sa_altmanz)
                     if sa_altmanz_value != 'N/A':
                         fig = go.Figure(go.Indicator(
@@ -1208,12 +1208,10 @@ if st.button("Get Data"):
                         st.plotly_chart(fig)
                     else:
                         st.warning("Altman Z-Score data is not available.")
-                with score_col2:
-                        st.caption("A score below 1.8 signals the company is likely headed for bankruptcy, while companies with scores above 3 are not likely to go bankrupt. Investors may consider purchasing a stock if its Altman Z-Score value is closer to 3 and selling, or shorting, a stock if the value is closer to 1.8.")
-            except: st.warning("Altman Z-Score data is not available.")
-            score_col3, score_col4 = st.columns([2,3])
-            try:    
-                with score_col3:
+                    st.caption("A score below 1.8 signals the company is likely headed for bankruptcy, while companies with scores above 3 are not likely to go bankrupt. Investors may consider purchasing a stock if its Altman Z-Score value is closer to 3 and selling, or shorting, a stock if the value is closer to 1.8.")
+                except: st.warning("Altman Z-Score data is not available.")
+            with score_col4:    
+                try:    
                     sa_piotroski_value = 'N/A' if sa_piotroski == 'N/A' else float(sa_piotroski)
                     if sa_piotroski_value != 'N/A':
                         fig = go.Figure(go.Indicator(
@@ -1243,9 +1241,8 @@ if st.button("Get Data"):
                         st.plotly_chart(fig)
                     else:
                         st.warning("Piotroski F-Score data is not available.")
-                with score_col4:
                     st.caption("A company with a high Piotroski F-Score (say, 7 or above) is likely to be in good financial health, and may therefore be a good investment. Conversely, a company with a low score (say, 3 or below) may be in poor financial health, and may therefore be a risky investment.")
-            except: st.warning("Piotroski F-Score data is not available.")
+                except: st.warning("Piotroski F-Score data is not available.")
             st.caption("Data source: Stockanalysis.com")
 
 #Analysts Ratings
