@@ -1035,6 +1035,7 @@ if st.button("Get Data"):
                                     title='Time Period',
                                     categoryorder='array',
                                     showgrid=True,  
+                                    tickangle=30,
                                     categoryarray=['90 Days Ago', '60 Days Ago', '30 Days Ago', '7 Days Ago', 'Current'],
                                 ),
                                 yaxis=dict(
@@ -1072,9 +1073,8 @@ if st.button("Get Data"):
                                 margin=dict(t=30, b=30, l=40, r=30),
                                 xaxis_title='Year',
                                 yaxis_title='Value',
-                                xaxis=dict(tickmode='array', tickvals=eps_unique_years_sorted, autorange='reversed',showgrid=True),
+                                xaxis=dict(tickmode='array', tickangle=30, tickvals=eps_unique_years_sorted, autorange='reversed',showgrid=True),
                                 yaxis=dict(showgrid=True),
-                                xaxis_tickangle=0,
                                 height=400
                             )
                             st.plotly_chart(figg, use_container_width=True)
@@ -1110,9 +1110,8 @@ if st.button("Get Data"):
                             margin=dict(t=30, b=30, l=40, r=30),
                             xaxis_title='Year',
                             yaxis_title='Value (%)',
-                            xaxis=dict(tickmode='array', tickvals=growth_unique_years_sorted,showgrid=True),
+                            xaxis=dict(tickmode='array', tickangle=30, tickvals=growth_unique_years_sorted,showgrid=True),
                             yaxis=dict(showgrid=True),
-                            xaxis_tickangle=0,
                             height=400
                         )
                         st.plotly_chart(fig_growth, use_container_width=True)
@@ -1177,9 +1176,9 @@ if st.button("Get Data"):
 
 # Scores
             st.subheader('Scores', divider='gray')
-            score_col1, score_col2, score_col3, score_col4, score_col5 = st.columns([1,2,1,2,1])
-            with score_col2:
-                try:
+            score_col1, score_col2 = st.columns([2,3])
+            try:
+                with score_col1:
                     sa_altmanz_value = 'N/A' if sa_altmanz == 'N/A' else float(sa_altmanz)
                     if sa_altmanz_value != 'N/A':
                         fig = go.Figure(go.Indicator(
@@ -1209,10 +1208,12 @@ if st.button("Get Data"):
                         st.plotly_chart(fig)
                     else:
                         st.warning("Altman Z-Score data is not available.")
-                    st.caption("A score below 1.8 signals the company is likely headed for bankruptcy, while companies with scores above 3 are not likely to go bankrupt. Investors may consider purchasing a stock if its Altman Z-Score value is closer to 3 and selling, or shorting, a stock if the value is closer to 1.8.")
-                except: st.warning("Altman Z-Score data is not available.")
-            with score_col4:
-                try:
+                with score_col2:
+                        st.caption("A score below 1.8 signals the company is likely headed for bankruptcy, while companies with scores above 3 are not likely to go bankrupt. Investors may consider purchasing a stock if its Altman Z-Score value is closer to 3 and selling, or shorting, a stock if the value is closer to 1.8.")
+            except: st.warning("Altman Z-Score data is not available.")
+            score_col3, score_col4 = st.columns([2,3])
+            try:    
+                with score_col3:
                     sa_piotroski_value = 'N/A' if sa_piotroski == 'N/A' else float(sa_piotroski)
                     if sa_piotroski_value != 'N/A':
                         fig = go.Figure(go.Indicator(
@@ -1236,14 +1237,15 @@ if st.button("Get Data"):
                             }
                         ))
                         fig.update_layout(
-                            height=250,
+                            height=350,
                             margin=dict(t=30, b=30, l=40, r=30)
                         )
                         st.plotly_chart(fig)
                     else:
                         st.warning("Piotroski F-Score data is not available.")
+                with score_col4:
                     st.caption("A company with a high Piotroski F-Score (say, 7 or above) is likely to be in good financial health, and may therefore be a good investment. Conversely, a company with a low score (say, 3 or below) may be in poor financial health, and may therefore be a risky investment.")
-                except: st.warning("Piotroski F-Score data is not available.")
+            except: st.warning("Piotroski F-Score data is not available.")
             st.caption("Data source: Stockanalysis.com")
 
 #Analysts Ratings
@@ -1332,7 +1334,7 @@ if st.button("Get Data"):
                 gauge.update_layout(
                     autosize=False,
                     width=400,  
-                    height=300, 
+                    height=350, 
                     margin={'l': 50, 'r': 50, 't': 10, 'b': 0} 
                 )
                 st.plotly_chart(gauge,use_container_width=True)
@@ -1831,9 +1833,8 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value',
-                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
-                        xaxis_tickangle=0,
                         height=400
                     )
                     st.plotly_chart(figf, use_container_width=True)
@@ -1866,9 +1867,8 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value',
-                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
-                        xaxis_tickangle=0,
                         height=400
                     )
                     st.plotly_chart(figv, use_container_width=True)
@@ -1903,9 +1903,8 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
-                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
-                        xaxis_tickangle=0,
                         height=400
                     )
                     st.plotly_chart(figp, use_container_width=True)
@@ -1937,9 +1936,8 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
-                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
-                        xaxis_tickangle=0,
                         height=400
                     )
                     st.plotly_chart(figy, use_container_width=True)
@@ -1978,7 +1976,7 @@ if st.button("Get Data"):
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
                         barmode='group',  
-                        xaxis=dict(tickangle=0, autorange='reversed'),
+                        xaxis=dict(tickangle=30, autorange='reversed'),
                         height=400  
                     )
                     st.plotly_chart(figm, use_container_width=True)
@@ -2012,9 +2010,8 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
-                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
-                        xaxis_tickangle=0,
                         height=400
                     )
                     st.plotly_chart(figg, use_container_width=True)
@@ -2991,7 +2988,6 @@ if st.button("Get Data"):
                             st.write("")
                 except: st.warning("Failed to get news.")
             ''
-
     except Exception as e:
         st.error(f"Failed to fetch data. {str(e)}")
 ''
