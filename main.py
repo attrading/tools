@@ -13,7 +13,7 @@ import re
 from dateutil.relativedelta import relativedelta
 import pytz
 
-st.set_page_config(page_title='US Stock Analysis Tool', layout='wide')
+st.set_page_config(page_title='US Stock Analysis Tool', layout='wide', page_icon="./Image/logo.png")
 
 @st.cache_data(ttl=3600)
 def get_stock_data(ticker, apiKey=None):
