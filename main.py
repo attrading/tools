@@ -1203,7 +1203,7 @@ if st.button("Get Data"):
                         ))
                         fig.update_layout(
                             height=350,
-                            margin=dict(t=30, b=30, l=40, r=30)
+                            margin=dict(t=50, b=20, l=40, r=30)
                         )
                         st.plotly_chart(fig)
                     else:
@@ -1238,7 +1238,7 @@ if st.button("Get Data"):
                         ))
                         fig.update_layout(
                             height=350,
-                            margin=dict(t=30, b=30, l=40, r=30)
+                            margin=dict(t=50, b=20, l=40, r=30)
                         )
                         st.plotly_chart(fig)
                     else:
@@ -1335,7 +1335,7 @@ if st.button("Get Data"):
                     autosize=False,
                     width=400,  
                     height=350, 
-                    margin={'l': 50, 'r': 50, 't': 10, 'b': 0} 
+                    margin={'l': 50, 'r': 50, 't': 50, 'b': 50} 
                 )
                 st.plotly_chart(gauge,use_container_width=True)
             gauge_pcol1, gauge_pcol2, gauge_pcol3= st.columns ([3,1,3])
