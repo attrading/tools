@@ -934,7 +934,6 @@ if st.button("Get Data"):
             ecol1, ecol2, ecol3 = st.columns([3, 1, 3])
             try:
                 earnings_data = pd.DataFrame(earnings_history)
-                st.write(earnings_data)
                 with ecol1:
                     if 'epsEstimate' in earnings_data.columns and 'epsActual' in earnings_data.columns:
                         df = earnings_data.reset_index().melt(id_vars=['index'], value_vars=['epsEstimate', 'epsActual'], var_name='variable', value_name='value')
@@ -1066,7 +1065,7 @@ if st.button("Get Data"):
                                     name=str(fiscal_year)
                                 ))
                             figg.update_layout(
-                                title={"text":"Growth Data", "font": {"size": 20}},
+                                title={"text":"EPS Trend", "font": {"size": 20}},
                                 title_y=1,  
                                 title_x=0, 
                                 margin=dict(t=30, b=30, l=40, r=30),
@@ -1128,41 +1127,47 @@ if st.button("Get Data"):
                     three_yr_header = f'FY {current_year + 3}'
                     try:
                         one_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', one_yr_header].values[0]
+                        one_yr_revenue_value = 'N/A' if one_yr_revenue == 'Upgrade' else one_yr_revenue
                         #one_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[6]].values[0]
-                    except: one_yr_revenue = 'N/A'
-                    sub_gcol1[0].metric(label='+1Y Revenue Growth',value=one_yr_revenue)
+                    except: one_yr_revenue_value = 'N/A'
+                    sub_gcol1[0].metric(label='+1Y Revenue Growth',value=one_yr_revenue_value)
 
                     try:
                         one_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', one_yr_header].values[0]
+                        one_yr_earnings_value = 'N/A' if one_yr_earnings == 'Upgrade' else one_yr_earnings
                         #one_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[6]].values[0]
-                    except: one_yr_earnings = 'N/A'
-                    sub_gcol1[1].metric(label='+1Y EPS Growth',value=one_yr_earnings)
+                    except: one_yr_earnings_value = 'N/A'
+                    sub_gcol1[1].metric(label='+1Y EPS Growth',value=one_yr_earnings_value)
 
                     sub_gcol2 = st.columns(2)
                     try:
                         two_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', two_yr_header].values[0]
+                        two_yr_revenue_value = 'N/A' if two_yr_revenue == 'Upgrade' else two_yr_revenue
                         #two_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[7]].values[0]
-                    except: two_yr_revenue = 'N/A'
-                    sub_gcol2[0].metric(label='+2Y Revenue Growth',value=two_yr_revenue)
+                    except: two_yr_revenue_value = 'N/A'
+                    sub_gcol2[0].metric(label='+2Y Revenue Growth',value=two_yr_revenue_value)
 
                     try:
                         two_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', two_yr_header].values[0]
+                        two_yr_earnings_value = 'N/A' if two_yr_earnings == 'Upgrade' else two_yr_earnings
                         #two_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[7]].values[0]
-                    except: two_yr_earnings = 'N/A'
-                    sub_gcol2[1].metric(label='+2Y EPS Growth',value=two_yr_earnings)
+                    except: two_yr_earnings_value = 'N/A'
+                    sub_gcol2[1].metric(label='+2Y EPS Growth',value=two_yr_earnings_value)
 
                     sub_gcol3 = st.columns(2)
                     try:
                         three_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', three_yr_header].values[0]
+                        three_yr_revenue_value = 'N/A' if three_yr_revenue == 'Upgrade' else three_yr_revenue 
                         #three_yr_revenue = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'Revenue Growth', sa_growth_df.columns[8]].values[0]
-                    except: three_yr_revenue = 'N/A'
-                    sub_gcol3[0].metric(label='+3Y Revenue Growth',value=three_yr_revenue)
+                    except: three_yr_revenue_value = 'N/A'
+                    sub_gcol3[0].metric(label='+3Y Revenue Growth',value=three_yr_revenue_value)
 
                     try:
                         three_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', three_yr_header].values[0]
+                        three_yr_earnings_value = 'N/A' if three_yr_earnings == 'Upgrade' else three_yr_earnings
                         #three_yr_earnings = sa_growth_df.loc[sa_growth_df.iloc[:, 0] == 'EPS Growth', sa_growth_df.columns[8]].values[0]
-                    except: three_yr_earnings = 'N/A'
-                    sub_gcol3[1].metric(label='+2Y EPS Growth',value=three_yr_earnings)
+                    except: three_yr_earnings_value = 'N/A'
+                    sub_gcol3[1].metric(label='+2Y EPS Growth',value=three_yr_earnings_value)
 
                     st.caption("The growth estimation data is sourced from Stockanalysis.com.")
                     st.caption("Please note that estimated data may not always be accurate and should not be solely relied upon for making investment decisions.")
