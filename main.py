@@ -1830,7 +1830,7 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value',
-                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
                         height=400
                     )
@@ -1864,7 +1864,7 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value',
-                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
                         height=400
                     )
@@ -1900,7 +1900,7 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
-                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
                         height=400
                     )
@@ -1933,7 +1933,7 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
-                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
                         height=400
                     )
@@ -1973,7 +1973,7 @@ if st.button("Get Data"):
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
                         barmode='group',  
-                        xaxis=dict(tickangle=30, autorange='reversed'),
+                        xaxis=dict(autorange='reversed'),
                         height=400  
                     )
                     st.plotly_chart(figm, use_container_width=True)
@@ -2007,7 +2007,7 @@ if st.button("Get Data"):
                         margin=dict(t=30, b=30, l=40, r=30),
                         xaxis_title='Year',
                         yaxis_title='Value (%)',
-                        xaxis=dict(tickmode='array', tickangle=30, tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
+                        xaxis=dict(tickmode='array', tickvals=unique_years_sorted, autorange='reversed',showgrid=True),
                         yaxis=dict(showgrid=True),
                         height=400
                     )
