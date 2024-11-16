@@ -1047,7 +1047,7 @@ if st.button("Get Data"):
                     except:
                         try:
                             epsmetrics = ['EPS (Diluted)']
-                            sa_eps_df_filtered = sa_eps_df2[sa_eps_df2['Fiscal Year'].isin(epsmetrics)]
+                            sa_eps_df_filtered = sa_metrics_df2[sa_metrics_df2['Fiscal Year'].isin(epsmetrics)]
                             sa_eps_df_melted = sa_eps_df_filtered.melt(id_vars=['Fiscal Year'], 
                                                         var_name='Year', 
                                                         value_name='Value')
